@@ -1,0 +1,142 @@
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Copy, ExternalLink, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { CreateInterviewWizard } from "@/components/dashboard/CreateInterviewWizard";
+import { StatCard } from "@/components/shared/StatCard";
+import { deleteSession, fetchDashboard, fetchSessions } from "@/services/sessions";
+
+
+export function DashboardPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const dashboard = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboard,
+  });
+
+  const sessions = useQuery({
+    queryKey: ["sessions"],
+    queryFn: fetchSessions,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSession,
+    onSuccess: () => {
+      toast.success("Interview removed");
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Total sessions" value={dashboard.data?.total_sessions ?? 0} hint="Created interviews across the workspace" />
+        <StatCard label="Active now" value={dashboard.data?.active_sessions ?? 0} hint="Sessions currently running" />
+        <StatCard label="Avg score" value={dashboard.data?.average_score ?? 0} hint="Blended evaluation score" />
+        <StatCard label="Cheating risk" value={`${dashboard.data?.average_cheating_probability ?? 0}%`} hint="Average suspicion probability" />
+      </section>
+
+      <section className="grid gap-6">
+        <CreateInterviewWizard />
+
+        <section className="glass-card p-6">
+          <div className="mb-5">
+            <p className="section-label">Sessions</p>
+            <h2 className="mt-2 text-2xl font-semibold">Recent interview pipeline</h2>
+          </div>
+
+          <div className="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 lg:block">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Interview</th>
+                  <th className="px-4 py-3 font-medium">Candidate</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Score</th>
+                  <th className="px-4 py-3 font-medium">Risk</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessions.data?.sessions?.map((session) => (
+                  <tr key={session.id} className="border-t border-slate-200 dark:border-white/10">
+                    <td className="px-4 py-4">
+                      <p className="font-medium">{session.title}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{session.job_role} · {session.experience_level}</p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p>{session.candidate_name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{session.candidate_email}</p>
+                    </td>
+                    <td className="px-4 py-4">{session.status?.toString()?.toUpperCase()}</td>
+                    <td className="px-4 py-4">{session.score ?? "--"}</td>
+                    <td className="px-4 py-4">{session.cheating_probability_score ?? "--"}</td>
+                    <td className="px-4 py-4">
+                      <div className="flex justify-end gap-2">
+                        <button className="button-secondary px-3 py-2" onClick={() => navigate(`/sessions/${session.id}`)}>Open</button>
+                        <button
+                          className="button-secondary px-3 py-2"
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(`${window.location.origin}/interview/${session.access_token}`);
+                            toast.success("Link copied!");
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="button-secondary px-3 py-2 text-rose-500"
+                          onClick={() => deleteMutation.mutate(session.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="space-y-4 lg:hidden">
+            {sessions.data?.sessions?.map((session) => (
+              <div key={session.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/40">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-semibold">{session.title}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{session.candidate_name} · {session.job_role}</p>
+                  </div>
+                  <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs text-cyan-700 dark:text-cyan-200">{session.status}</span>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-white p-3 text-sm dark:bg-white/5">Score: {session.score ?? "--"}</div>
+                  <div className="rounded-2xl bg-white p-3 text-sm dark:bg-white/5">Authenticity: {session.authenticity_rating ?? "--"}</div>
+                  <div className="rounded-2xl bg-white p-3 text-sm dark:bg-white/5">Risk: {session.cheating_probability_score ?? "--"}</div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button className="button-secondary" onClick={() => navigate(`/sessions/${session.id}`)}>
+                    <ExternalLink className="mr-2 inline h-4 w-4" />
+                    Open
+                  </button>
+                  <button
+                    className="button-secondary"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${window.location.origin}/interview/${session.access_token}`);
+                      toast.success("Link copied!");
+                    }}
+                  >
+                    <Copy className="mr-2 inline h-4 w-4" />
+                    Copy Invite Link
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    </div>
+  );
+}

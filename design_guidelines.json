@@ -1,0 +1,150 @@
+{
+  "theme": "light",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "design_philosophy": {
+    "rationale": "For an HR/Interview proctoring tool, Authority, Clarity, and Truth are paramount. A Swiss & High-Contrast design provides a sterile, highly legible, and objective environment that builds trust. It reduces candidate anxiety by presenting information cleanly, while giving recruiters a functional, dense command center.",
+    "key_traits": ["Rigid Grids", "Sharp Edges", "High-Contrast Typography", "Minimalist Ornamentation"]
+  },
+  "color_palette": {
+    "primary": {
+      "hex": "#0055FF",
+      "tailwind": "blue-600",
+      "name": "Signal Blue",
+      "usage": "Primary actions, active states, progress bars."
+    },
+    "secondary": {
+      "hex": "#0A0A0A",
+      "tailwind": "gray-950",
+      "name": "Obsidian Black",
+      "usage": "Text, strong borders, dark surfaces."
+    },
+    "background": {
+      "hex": "#FFFFFF",
+      "tailwind": "white",
+      "name": "Stark White",
+      "usage": "Main app background, content areas."
+    },
+    "surface": {
+      "hex": "#F9FAFB",
+      "tailwind": "gray-50",
+      "name": "10% Grey",
+      "usage": "Sidebars, secondary panels, table headers."
+    },
+    "alerts": {
+      "warning": {
+        "hex": "#EAB308",
+        "tailwind": "yellow-500",
+        "usage": "Proctoring flags, medium-severity alerts."
+      },
+      "danger": {
+        "hex": "#EF4444",
+        "tailwind": "red-500",
+        "usage": "Critical proctoring violations (e.g., face missing)."
+      },
+      "success": {
+        "hex": "#22C55E",
+        "tailwind": "green-500",
+        "usage": "Passed checks, completed steps."
+      }
+    }
+  },
+  "typography": {
+    "strategy": "Swiss Brutalist (Tech)",
+    "fonts": {
+      "heading": "Cabinet Grotesk",
+      "body": "IBM Plex Sans",
+      "mono": "JetBrains Mono"
+    },
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter font-black",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-semibold",
+      "h4": "text-lg sm:text-xl font-semibold",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm text-gray-600",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-gray-500"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing (Tailwind Scale p-6, p-8, p-12)",
+    "dashboard_grid": {
+      "type": "Control Room Grid",
+      "structure": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+      "rules": "Every pixel utilized. Use h-full on children. No jagged bottoms."
+    },
+    "interview_room_grid": {
+      "structure": "grid-cols-1 lg:grid-cols-12 gap-6",
+      "candidate_cam": "col-span-1 lg:col-span-4",
+      "ai_panel": "col-span-1 lg:col-span-8"
+    },
+    "containers": {
+      "card_padding": "p-6 sm:p-8",
+      "section_spacing": "py-12 sm:py-24"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "rounded-none px-6 py-3 font-semibold transition-all border border-transparent bg-gray-950 text-white hover:bg-gray-800 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+      "secondary": "rounded-none px-6 py-3 font-semibold transition-all border border-gray-300 bg-white text-gray-950 hover:border-gray-950 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+      "danger": "rounded-none px-6 py-3 font-semibold transition-all border border-transparent bg-red-500 text-white hover:bg-red-600"
+    },
+    "cards": "rounded-none border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow",
+    "inputs": "rounded-none border border-gray-300 bg-white px-4 py-2 focus:border-gray-950 focus:ring-1 focus:ring-gray-950 focus:outline-none transition-colors",
+    "tables": "w-full text-left text-sm border-collapse [&_th]:border-b-2 [&_th]:border-gray-950 [&_th]:py-4 [&_th]:px-4 [&_th]:font-semibold [&_td]:border-b [&_td]:border-gray-200 [&_td]:py-4 [&_td]:px-4 [&_tr:hover]:bg-gray-50",
+    "badges": "rounded-none px-2 py-1 text-xs font-bold uppercase tracking-wider border border-gray-200 bg-gray-50"
+  },
+  "surfaces": {
+    "header": "bg-white border-b border-gray-200 z-50 sticky top-0",
+    "sidebar": "bg-gray-50 border-r border-gray-200",
+    "video_container": "bg-black border border-gray-950 relative overflow-hidden group",
+    "proctor_alert_banner": "bg-red-500 text-white p-3 font-semibold text-sm flex items-center gap-2",
+    "ai_chat": "bg-white border border-gray-200 p-6 flex flex-col h-full"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "install_command": "yarn add lucide-react",
+    "style": "stroke-width: 1.5, sharp and clinical"
+  },
+  "motion": {
+    "transitions": "transition-all duration-200 ease-in-out",
+    "hover_effects": "Subtle border darkening and slight shadow lift. No bouncing.",
+    "progress_bars": "Smooth linear transitions for timers."
+  },
+  "images": [
+    {
+      "url": "https://images.pexels.com/photos/3137073/pexels-photo-3137073.jpeg",
+      "description": "Minimalist white abstract background",
+      "category": "background_pattern"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1762522926157-bcc04bf0b10a",
+      "description": "Professional avatar 1 (Recruiter)",
+      "category": "avatar_recruiter"
+    },
+    {
+      "url": "https://images.pexels.com/photos/30004324/pexels-photo-30004324.jpeg",
+      "description": "Professional avatar 2 (Candidate)",
+      "category": "avatar_candidate"
+    },
+    {
+      "url": "https://images.pexels.com/photos/4031707/pexels-photo-4031707.jpeg",
+      "description": "Candidate video placeholder in interview room",
+      "category": "video_placeholder"
+    }
+  ],
+  "accessibility": {
+    "contrast": "WCAG AA minimum. Use high contrast black/white for primary data.",
+    "focus_states": "Visible focus rings on all interactive elements (focus:ring-2 focus:ring-blue-600 focus:ring-offset-2).",
+    "test_attributes": "All interactive elements MUST have data-testid attributes (e.g., data-testid='create-session-btn', data-testid='mic-test-btn')."
+  },
+  "instructions_to_main_agent": [
+    "TECH STACK: React, Tailwind CSS, Shadcn UI.",
+    "COMPONENT OVERRIDES: When using Shadcn, override rounded borders to `rounded-none` to match the Swiss Brutalist aesthetic. Use strict 1px or 2px solid borders instead of soft drop shadows.",
+    "INTERVIEW ROOM LAYOUT: Split the screen horizontally on mobile and vertically on desktop. The AI Question/Editor should dominate (60-70% width), with the Candidate Webcam and Timer pinned to the side (30-40% width).",
+    "PROCTORING ALERTS: Display proctoring violations (e.g., 'Multiple faces detected', 'Tab switched') as high-contrast red or yellow banners immediately overlaid on or above the webcam feed.",
+    "DATA VISUALIZATION: Use Recharts for the Results Dashboard. Keep charts minimal, using solid colors (Blue-600, Gray-950, Red-500) and no gradients.",
+    "BRANDING: Use a strong typographic logo with a Lucide Icon (e.g., `<Target /> AI Proctor`) rather than a generic image.",
+    "TESTING: Add `data-testid` to all forms, inputs, buttons, and alert components for End-to-End testing reliability.",
+    "ICONS: Install `lucide-react` and use it exclusively for system icons to maintain a crisp, consistent weight."
+  ]
+}

@@ -1,0 +1,146 @@
+/* Global App Styles - Swiss Brutalist */
+
+.App {
+  min-height: 100vh;
+}
+
+/* Header Styles */
+.header-swiss {
+  @apply bg-white border-b border-gray-200 sticky top-0 z-50;
+}
+
+/* Sidebar Styles */
+.sidebar-swiss {
+  @apply bg-gray-50 border-r border-gray-200;
+}
+
+/* Main Content */
+.main-content {
+  @apply bg-white min-h-screen;
+}
+
+/* Link Styles */
+.link-swiss {
+  @apply text-gray-950 underline decoration-1 underline-offset-4 hover:decoration-2 transition-all;
+}
+
+/* Form Container */
+.form-container {
+  @apply max-w-md mx-auto p-8;
+}
+
+/* Stats Card */
+.stats-card {
+  @apply rounded-none border border-gray-200 bg-white p-6 hover:border-gray-400 transition-colors;
+}
+
+/* Session Card */
+.session-card {
+  @apply rounded-none border border-gray-200 bg-white p-6 hover:shadow-md transition-shadow cursor-pointer;
+}
+
+/* Status Badges */
+.status-pending {
+  @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+}
+
+.status-in-progress {
+  @apply bg-blue-50 text-blue-700 border-blue-200;
+}
+
+.status-completed {
+  @apply bg-green-50 text-green-700 border-green-200;
+}
+
+/* Score Indicator */
+.score-high {
+  @apply text-green-600;
+}
+
+.score-medium {
+  @apply text-yellow-600;
+}
+
+.score-low {
+  @apply text-red-600;
+}
+
+/* Interview Room Styles */
+.interview-container {
+  @apply grid grid-cols-1 lg:grid-cols-12 gap-6 p-6;
+}
+
+.webcam-panel {
+  @apply lg:col-span-4;
+}
+
+.question-panel {
+  @apply lg:col-span-8;
+}
+
+/* Proctoring Overlay */
+.proctoring-overlay {
+  @apply absolute inset-0 bg-red-500 bg-opacity-20 flex items-center justify-center;
+}
+
+/* Timer */
+.timer-warning {
+  @apply text-yellow-600;
+}
+
+.timer-danger {
+  @apply text-red-600 animate-pulse;
+}
+
+/* Question Card */
+.question-card {
+  @apply rounded-none border-2 border-gray-950 bg-white p-8;
+}
+
+/* Answer Input */
+.answer-input {
+  @apply w-full rounded-none border border-gray-300 p-4 min-h-[200px] resize-none focus:border-gray-950 focus:ring-1 focus:ring-gray-950 focus:outline-none;
+}
+
+/* Navigation */
+.nav-link {
+  @apply px-4 py-2 text-gray-600 hover:text-gray-950 font-medium transition-colors;
+}
+
+.nav-link-active {
+  @apply text-gray-950 border-b-2 border-gray-950;
+}
+
+/* Empty State */
+.empty-state {
+  @apply text-center py-16;
+}
+
+/* Loading Spinner */
+.spinner {
+  @apply w-6 h-6 border-2 border-gray-950 border-t-transparent rounded-full animate-spin;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm bg-gray-950 text-white rounded-none shadow-lg;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal-content {
+  @apply bg-white rounded-none border border-gray-200 shadow-xl max-w-lg w-full mx-4;
+}
+
+/* Chart Container */
+.chart-container {
+  @apply rounded-none border border-gray-200 bg-white p-6;
+}
+
+/* Violation Badge */
+.violation-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200;
+}
