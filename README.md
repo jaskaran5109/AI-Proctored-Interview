@@ -1,9 +1,3 @@
-# Here are your Instructions
+# AI Proctored Interview Platform
 
-Live: 
-
-https://interview-queue-1.preview.emergentagent.com/
-
-Code: 
-
-https://vscode-11fa7b5b-6824-4aaa-a9b0-526784cff520.preview.emergentagent.com/
+Production-style full-stack interview platform with AI-assisted evaluation, proctoring signals, recruiter workflows, and a responsive candidate experience.
