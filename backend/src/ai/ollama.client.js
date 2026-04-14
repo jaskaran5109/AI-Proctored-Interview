@@ -1,10 +1,12 @@
-const { OpenAI } = require("openai");
+const { Ollama } = require("ollama");
 
-const aiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "ollama",
-  baseURL: `${process.env.OLLAMA_BASE_URL || "http://localhost:11434"}/v1`,
+const configuredBaseUrl =
+  process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+
+const aiClient = new Ollama({
+  host: configuredBaseUrl,
 });
 
-const aiModel = process.env.OPENAI_MODEL || "minimax-m2.7:cloud";
+const aiModel = process.env.OLLAMA_MODEL || "llama3.2:3b";
 
 module.exports = { aiClient, aiModel };

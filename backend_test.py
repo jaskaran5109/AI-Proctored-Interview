@@ -172,7 +172,7 @@ class AIInterviewTester:
             "job_role": "Software Engineer",
             "topics": ["Python", "JavaScript", "System Design"],
             "difficulty": "medium",
-            "question_count": 3,
+            "question_count": 2,
             "time_limit": 30,
             "candidate_email": f"candidate{timestamp}@test.com",
             "candidate_name": f"Test Candidate {timestamp}"

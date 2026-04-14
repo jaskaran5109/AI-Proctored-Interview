@@ -6,14 +6,32 @@ import { AppShell } from "@/components/layout/AppShell";
 import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 import { useAuthStore } from "@/store/authStore";
 
-
-const AdminPage = lazy(() => import("@/pages/AdminPage").then((module) => ({ default: module.AdminPage })));
-const AuthPage = lazy(() => import("@/pages/AuthPage").then((module) => ({ default: module.AuthPage })));
-const DashboardPage = lazy(() => import("@/pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
-const InterviewPage = lazy(() => import("@/pages/InterviewPage").then((module) => ({ default: module.InterviewPage })));
-const ResultPage = lazy(() => import("@/pages/ResultPage").then((module) => ({ default: module.ResultPage })));
-const SessionDetailPage = lazy(() => import("@/pages/SessionDetailPage").then((module) => ({ default: module.SessionDetailPage })));
-
+const AdminPage = lazy(() =>
+  import("@/pages/AdminPage").then((module) => ({ default: module.AdminPage })),
+);
+const AuthPage = lazy(() =>
+  import("@/pages/AuthPage").then((module) => ({ default: module.AuthPage })),
+);
+const DashboardPage = lazy(() =>
+  import("@/pages/DashboardPage").then((module) => ({
+    default: module.DashboardPage,
+  })),
+);
+const InterviewPage = lazy(() =>
+  import("@/pages/InterviewPage").then((module) => ({
+    default: module.InterviewPage,
+  })),
+);
+const ResultPage = lazy(() =>
+  import("@/pages/ResultPage").then((module) => ({
+    default: module.ResultPage,
+  })),
+);
+const SessionDetailPage = lazy(() =>
+  import("@/pages/SessionDetailPage").then((module) => ({
+    default: module.SessionDetailPage,
+  })),
+);
 
 function PageLoader() {
   return (
@@ -22,7 +40,6 @@ function PageLoader() {
     </div>
   );
 }
-
 
 function ProtectedRoute({
   children,
@@ -47,7 +64,6 @@ function ProtectedRoute({
 
   return children;
 }
-
 
 export default function App() {
   const bootstrap = useAuthBootstrap();
@@ -78,6 +94,16 @@ export default function App() {
             />
             <Route
               path="/sessions/:sessionId"
+              element={
+                <ProtectedRoute>
+                  <AppShell>
+                    <SessionDetailPage />
+                  </AppShell>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruiter/interviews/:sessionId"
               element={
                 <ProtectedRoute>
                   <AppShell>

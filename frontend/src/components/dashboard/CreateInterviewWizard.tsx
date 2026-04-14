@@ -1,29 +1,36 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Info, Mail, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { KeyboardEvent, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import toast from "react-hot-toast";
 
-import { createSession } from "@/services/sessions";
+import { createSession, fetchRoleTemplates } from "@/services/sessions";
 import { CreateSessionPayload } from "@/types/api";
+import CustomDropdown from "../shared/CustomDropdown";
 
 const schema = z.object({
   title: z.string().min(3, "Title is required"),
   job_role: z.string().min(2, "Role is required"),
   experience_level: z.enum(["junior", "mid", "senior", "staff"]),
-  candidate_name: z.string().min(2, "Candidate name is required"),
-  candidate_email: z.string().email("Enter a valid email"),
   topics: z.string().min(3, "Add at least one topic"),
   difficulty: z.enum(["easy", "medium", "hard"]),
-  question_count: z.coerce.number().min(3).max(10),
-  time_limit: z.coerce.number().min(10).max(120),
+  interview_format: z.enum(["theoretical","coding", "mixed"]),
+  question_count: z.coerce.number().min(2).max(10),
+  time_limit: z.coerce.number().min(1).max(120),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-const steps = ["Role setup", "Candidate", "Interview config"];
+const steps = ["Role setup", "Invite flow", "Interview config"];
+const builtInRoles = [
+  "Backend Engineer",
+  "Frontend Engineer",
+  "Product Designer",
+  "ML Engineer",
+  "DSA Engineer",
+];
 
 const smartDefaults: Record<string, Partial<FormValues>> = {
   "Frontend Engineer": {
@@ -39,7 +46,13 @@ const smartDefaults: Record<string, Partial<FormValues>> = {
   "Product Designer": {
     topics: "ux research,design systems,collaboration,accessibility",
     difficulty: "medium",
+    interview_format: "theoretical",
     time_limit: 30,
+  },
+  "DSA Engineer": {
+    topics: "coding,arrays,linked lists,trees,graphs,sorting,searching",
+    difficulty: "medium",
+    time_limit: 45,
   },
 };
 
@@ -47,6 +60,10 @@ export function CreateInterviewWizard() {
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [createdLink, setCreatedLink] = useState("");
+  const roleTemplates = useQuery({
+    queryKey: ["role-templates"],
+    queryFn: fetchRoleTemplates,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -54,10 +71,9 @@ export function CreateInterviewWizard() {
       title: "",
       job_role: "Backend Engineer",
       experience_level: "mid",
-      candidate_name: "",
-      candidate_email: "",
       topics: "python,fastapi,apis,scalability",
       difficulty: "medium",
+      interview_format: "mixed",
       question_count: 5,
       time_limit: 40,
     },
@@ -65,26 +81,44 @@ export function CreateInterviewWizard() {
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      const payload: CreateSessionPayload = {
-        title: values.title,
-        job_role: values.job_role,
-        experience_level: values.experience_level,
-        candidate_name: values.candidate_name,
-        candidate_email: values.candidate_email,
-        difficulty: values.difficulty,
-        question_count: values.question_count,
-        time_limit: values.time_limit,
-        topics: values.topics
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean),
-      };
-      return createSession(payload);
+      try {
+        const payload: CreateSessionPayload = {
+          title: values.title,
+          job_role: values.job_role,
+          experience_level: values.experience_level,
+          difficulty: values.difficulty,
+          interview_format: values.interview_format,
+          question_count: Number(values.question_count),
+          time_limit: Number(values.time_limit),
+          topics: values.topics
+            ? values.topics
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : [],
+        };
+        const res = await createSession(payload);
+        return res;
+      } catch (error) {
+        toast.error("Could not create interview");
+        throw error;
+      }
     },
     onSuccess: (session) => {
       setCreatedLink(
         `${window.location.origin}/interview/${session.access_token}`,
       );
+      form.reset({
+        title: "",
+        job_role: "Backend Engineer",
+        experience_level: "mid",
+        topics: "python,fastapi,apis,scalability",
+        difficulty: "medium",
+        interview_format: "mixed",
+        question_count: 5,
+        time_limit: 40,
+      });
+      setStep(0);
       toast.success("Interview created");
       void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["sessions"] });
@@ -93,12 +127,30 @@ export function CreateInterviewWizard() {
   });
 
   const completion = useMemo(() => ((step + 1) / steps.length) * 100, [step]);
+  const roleOptions = useMemo(() => {
+    const templateRoles = (roleTemplates.data?.templates || []).map(
+      (item) => item.role_name,
+    );
+
+    return Array.from(new Set([...builtInRoles, ...templateRoles])).map(
+      (role) => ({
+        label: role,
+        value: role,
+      }),
+    );
+  }, [roleTemplates.data?.templates]);
 
   const nextStep = async () => {
     const fields = [
       ["title", "job_role", "experience_level"],
-      ["candidate_name", "candidate_email"],
-      ["topics", "difficulty", "question_count", "time_limit"],
+      [] as Array<keyof FormValues>,
+      [
+        "topics",
+        "difficulty",
+        "interview_format",
+        "question_count",
+        "time_limit",
+      ],
     ][step] as Array<keyof FormValues>;
 
     const valid = await form.trigger(fields);
@@ -109,7 +161,48 @@ export function CreateInterviewWizard() {
     setStep((current) => Math.min(current + 1, steps.length - 1));
   };
 
+  const handleCreateInterview = async () => {
+    if (mutation.isPending) {
+      return;
+    }
+    const valid = await form.trigger();
+    if (!valid) {
+      toast.error("Please fix the highlighted fields");
+      return;
+    }
+    const values = form.getValues();
+    mutation.mutate(values);
+  };
+
+  const handleFormKeyDown = async (event: KeyboardEvent<HTMLFormElement>) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    const tagName = target?.tagName?.toLowerCase();
+    if (tagName === "textarea") {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (step < steps.length - 1) {
+      await nextStep();
+    }
+  };
+
   const applyDefaults = (role: string) => {
+    const savedTemplate = roleTemplates.data?.templates.find(
+      (item) => item.role_name === role,
+    );
+    if (savedTemplate) {
+      form.setValue("topics", savedTemplate.topics.join(", "));
+      form.setValue("difficulty", savedTemplate.default_difficulty);
+      toast.success("Saved role template applied");
+      return;
+    }
+
     const defaults = smartDefaults[role];
     if (!defaults) {
       return;
@@ -129,7 +222,8 @@ export function CreateInterviewWizard() {
             Step-based interview builder
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Smart defaults, inline validation, and share-ready invite links.
+            Smart defaults, inline validation, share-ready invite links, and a
+            built-in live coding round.
           </p>
         </div>
         <div className="hidden rounded-3xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-cyan-700 dark:text-cyan-200 sm:block">
@@ -156,7 +250,8 @@ export function CreateInterviewWizard() {
 
       <form
         className="space-y-5"
-        onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+        onSubmit={(event) => event.preventDefault()}
+        onKeyDown={handleFormKeyDown}
         noValidate
       >
         {step === 0 && (
@@ -172,73 +267,48 @@ export function CreateInterviewWizard() {
               </p>
             </div>
             <div>
-              <select
-                className="input-premium"
-                {...form.register("job_role")}
-                onChange={(event) => {
-                  form.setValue("job_role", event.target.value);
-                  applyDefaults(event.target.value);
+              <CustomDropdown
+                options={roleOptions}
+                value={form.watch("job_role")}
+                placeholder="Select job role"
+                onChange={(val) => {
+                  form.setValue("job_role", val);
+                  applyDefaults(val);
                 }}
-              >
-                {[
-                  "Backend Engineer",
-                  "Frontend Engineer",
-                  "Product Designer",
-                  "ML Engineer",
-                ].map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                <Info className="mr-1 inline h-3.5 w-3.5" />
-                Smart defaults adapt topics and timing.
+              />
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <Info className="mr-1 ml-2 inline h-2.5 w-2.5" />
+                Saved role templates are applied first, then local smart
+                defaults.
               </p>
             </div>
             <div>
-              <select
-                className="input-premium"
-                {...form.register("experience_level")}
-              >
-                {["junior", "mid", "senior", "staff"].map((level) => (
-                  <option key={level} value={level}>
-                    {level
-                      ? level.substring(0, 1).toUpperCase() + level.slice(1)
-                      : ""}
-                  </option>
-                ))}
-              </select>
+              <CustomDropdown
+                options={[
+                  { label: "Junior", value: "junior" },
+                  { label: "Mid", value: "mid" },
+                  { label: "Senior", value: "senior" },
+                  { label: "Staff", value: "staff" },
+                ]}
+                value={form.watch("experience_level")}
+                placeholder="Select experience level"
+                onChange={(val) => form.setValue("experience_level", val)}
+              />
             </div>
           </div>
         )}
 
         {step === 1 && (
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <input
-                className="input-premium"
-                placeholder="Candidate name"
-                {...form.register("candidate_name")}
-              />
-              <p className="mt-1 text-sm text-rose-500">
-                {form.formState.errors.candidate_name?.message}
-              </p>
-            </div>
-            <div>
-              <input
-                className="input-premium"
-                placeholder="Candidate email"
-                {...form.register("candidate_email")}
-              />
-              <p className="mt-1 text-sm text-rose-500">
-                {form.formState.errors.candidate_email?.message}
-              </p>
-            </div>
-            <div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+          <div className="grid gap-4">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
               <Mail className="mr-2 inline h-4 w-4" />
-              Optional email sharing can be layered in later; invite link
-              generation is ready immediately after creation.
+              Candidates will enter their own name and email from the invite
+              link before starting. Each attempt creates an isolated interview
+              session.
+            </div>
+            <div className="rounded-3xl border border-cyan-500/20 bg-cyan-500/10 p-4 text-sm text-cyan-900 dark:text-cyan-100">
+              One invite link now supports multiple candidates independently
+              with separate scores, AI feedback, and proctoring logs.
             </div>
           </div>
         )}
@@ -259,14 +329,50 @@ export function CreateInterviewWizard() {
               <label className="mb-2 block text-sm font-medium">
                 Difficulty
               </label>
-              <select
+              {/* <select
                 className="input-premium"
                 {...form.register("difficulty")}
               >
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
-              </select>
+              </select> */}
+              <CustomDropdown
+                options={[
+                  { label: "Easy", value: "easy" },
+                  { label: "Medium", value: "medium" },
+                  { label: "Hard", value: "hard" },
+                ]}
+                value={form.watch("difficulty")}
+                placeholder="Select difficulty"
+                onChange={(val) => form.setValue("difficulty", val)}
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Interview format
+              </label>
+              {/* <select
+                className="input-premium"
+                {...form.register("interview_format")}
+              >
+                <option value="mixed">Mixed: theoretical + coding</option>
+                <option value="theoretical">Theoretical only</option>
+              </select> */}
+              <CustomDropdown
+                options={[
+                  { label: "Theoretical only", value: "theoretical" },
+                  { label: "Coding only", value: "coding" },
+                  { label: "Mixed: theoretical + coding", value: "mixed" },
+                ]}
+                value={form.watch("interview_format")}
+                placeholder="Select interview format"
+                onChange={(val) => form.setValue("interview_format", val)}
+              />
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Mixed interviews include both text questions and one live coding
+                round.
+              </p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">
@@ -275,7 +381,7 @@ export function CreateInterviewWizard() {
               <input
                 className="input-premium"
                 type="number"
-                min={3}
+                min={2}
                 max={10}
                 {...form.register("question_count")}
               />
@@ -287,7 +393,7 @@ export function CreateInterviewWizard() {
               <input
                 className="input-premium"
                 type="number"
-                min={10}
+                min={1}
                 max={120}
                 {...form.register("time_limit")}
               />
@@ -300,24 +406,30 @@ export function CreateInterviewWizard() {
           </div>
         )}
 
-        <div className="flex flex-wrap justify-between gap-3">
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => setStep((current) => Math.max(current - 1, 0))}
-            disabled={step === 0}
-          >
-            Back
-          </button>
+        <div
+          className={`flex flex-wrap ${step !== 0 ? "justify-between" : "justify-end"} gap-3`}
+        >
+          {step !== 0 && (
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => setStep((current) => Math.max(current - 1, 0))}
+            >
+              Back
+            </button>
+          )}
           {step < steps.length - 1 ? (
             <button type="button" className="button-primary" onClick={nextStep}>
               Continue
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
               className="button-primary"
               disabled={mutation.isPending}
+              onClick={() => {
+                void handleCreateInterview();
+              }}
             >
               {mutation.isPending ? "Creating..." : "Create interview"}
             </button>

@@ -15,7 +15,7 @@ export const useInterviewStore = create((set) => ({
   fetchSessions: async () => {
     set({ isLoading: true });
     try {
-      const response = await axios.get(`${API_URL}/api/sessions/list`);
+      const response = await axios.get(`${API_URL}/api/sessions`);
       set({ sessions: response.data, isLoading: false });
     } catch (error) {
       set({ error: error.message, isLoading: false });
@@ -36,16 +36,18 @@ export const useInterviewStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(
-        `${API_URL}/api/sessions/create`,
+        `${API_URL}/api/sessions`,
         sessionData,
       );
       const newSession = response.data;
       set((state) => {
+        // Handle both raw array and wrapped response format
+        const currentSessions = state.sessions?.sessions || state.sessions || [];
         return {
-          sessions: [
-            newSession,
-            ...(Array.isArray(state.sessions) ? state.sessions : []),
-          ],
+          sessions: {
+            sessions: [newSession, ...currentSessions],
+            total: (state.sessions?.total || currentSessions.length) + 1,
+          },
           isLoading: false,
         };
       });
@@ -74,18 +76,22 @@ export const useInterviewStore = create((set) => ({
       const response = await axios.delete(
         `${API_URL}/api/sessions/${sessionId}`,
       );
-      // Remove the session from state - handle both id and _id formats
+      // Remove the session from state - handle both raw array and wrapped response format
       set((state) => {
+        const currentSessions = state.sessions?.sessions || state.sessions || [];
+        const filteredSessions = Array.isArray(currentSessions)
+          ? currentSessions.filter((s) => s.id !== sessionId && s._id !== sessionId)
+          : [];
         return {
-          sessions: state.sessions?.sessions?.filter(
-            (s) => s.id !== sessionId && s._id !== sessionId,
-          ),
+          sessions: {
+            sessions: filteredSessions,
+            total: state.sessions?.total || filteredSessions.length,
+          },
           error: null,
         };
       });
       return response.data;
     } catch (error) {
-      debugger;
       const errorMsg =
         error.response?.data?.detail ||
         error.message ||
@@ -120,12 +126,14 @@ export const useInterviewStore = create((set) => ({
     }
   },
 
-  submitAnswer: async (questionId, answerText, timeTaken) => {
+  submitAnswer: async (questionId, answerText, timeTaken, sessionToken) => {
     try {
       const response = await axios.post(`${API_URL}/api/interviews/answer`, {
+        session_token: sessionToken,
         question_id: questionId,
         answer_text: answerText.trim(),
-        time_taken: timeTaken,
+        time_taken_seconds: timeTaken,
+        typing_metrics: { typingSpeed: 0, pauseCount: 0, editCount: 0 },
       });
 
       const data = response.data;
@@ -139,6 +147,8 @@ export const useInterviewStore = create((set) => ({
         progress: data.progress,
         nextQuestion: data.next_question,
         finalScore: data.final_score,
+        warnings: data.warnings,
+        skill_progress: data.skill_progress,
       };
     } catch (error) {
       throw new Error(

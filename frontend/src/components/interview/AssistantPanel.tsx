@@ -12,11 +12,15 @@ interface Message {
 
 
 export function AssistantPanel({
-  accessToken,
+  sessionToken,
   questionId,
+  currentAnswer,
+  disabled = false,
 }: {
-  accessToken: string;
+  sessionToken?: string;
   questionId?: string;
+  currentAnswer?: string;
+  disabled?: boolean;
 }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -29,10 +33,10 @@ export function AssistantPanel({
 
   const mutation = useMutation({
     mutationFn: async (message: string) => {
-      if (!questionId) {
+      if (!questionId || !sessionToken) {
         return { reply: "Start the interview to use the assistant." };
       }
-      return sendAssistantMessage({ accessToken, questionId, message });
+      return sendAssistantMessage({ sessionToken, questionId, message, currentAnswer });
     },
     onSuccess: (data, message) => {
       setMessages((current) => [
@@ -41,6 +45,15 @@ export function AssistantPanel({
         { role: "assistant", content: data.reply },
       ]);
       setInput("");
+    },
+    onError: () => {
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "Try again. The assistant is temporarily unavailable.",
+        },
+      ]);
     },
   });
 
@@ -55,6 +68,9 @@ export function AssistantPanel({
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!input.trim()) {
+      return;
+    }
+    if (disabled) {
       return;
     }
     mutation.mutate(input.trim());
@@ -125,6 +141,7 @@ export function AssistantPanel({
           placeholder="Ask for a hint or clarification..."
           value={input}
           onChange={(event) => setInput(event.target.value)}
+          disabled={disabled}
         />
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
@@ -133,7 +150,7 @@ export function AssistantPanel({
           <button
             type="submit"
             className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:bg-cyan-500/60 disabled:hover:bg-cyan-500/60"
-            disabled={mutation.isPending || !input.trim()}
+            disabled={disabled || mutation.isPending || !input.trim()}
           >
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {mutation.isPending ? "Thinking..." : "Send"}

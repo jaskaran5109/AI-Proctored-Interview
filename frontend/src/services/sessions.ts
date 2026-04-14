@@ -3,6 +3,7 @@ import {
   AdminAnalytics,
   CreateSessionPayload,
   Dashboard,
+  RoleTemplate,
   Session,
   SessionDetail,
 } from "@/types/api";
@@ -46,5 +47,10 @@ export async function fetchAdminAnalytics() {
 
 export async function createRoleConfig(payload: Record<string, unknown>) {
   const { data } = await api.post("/admin/roles", payload);
+  return data;
+}
+
+export async function fetchRoleTemplates() {
+  const { data } = await api.get<{ templates: RoleTemplate[] }>("/roles/templates");
   return data;
 }

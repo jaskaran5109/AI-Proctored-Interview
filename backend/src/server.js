@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const { app } = require("./app");
 const { connectDatabase } = require("./config/db");
 const { seedAdmin } = require("./utils/seed");
+const { logger } = require("./utils/logger");
 const { registerSocketServer } = require("./utils/socket");
 
 const port = Number(process.env.PORT || 8000);
@@ -23,11 +24,11 @@ async function start() {
   await connectDatabase();
   await seedAdmin();
   server.listen(port, () => {
-    console.log(`Node backend listening on ${port}`);
+    logger.info(`Node backend listening on ${port}`);
   });
 }
 
 start().catch((error) => {
-  console.error("Failed to start server", error);
+  logger.error("Failed to start server", { error: error.message, stack: error.stack });
   process.exit(1);
 });

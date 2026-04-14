@@ -273,6 +273,7 @@ export default function InterviewRoom() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [violations, setViolations] = useState([]);
   const [sessionId, setSessionId] = useState(null);
+  const [sessionToken, setSessionToken] = useState(null); // Store session_token for API calls
   const [authenticityHint, setAuthenticityHint] = useState(null);
   const [assistantCollapsed, setAssistantCollapsed] = useState(false);
   const [currentUnderstandingLevel, setCurrentUnderstandingLevel] =
@@ -367,11 +368,11 @@ export default function InterviewRoom() {
     try {
       const result = await startInterview(accessToken);
       setSessionId(result.session_id);
+      setSessionToken(result.session_token); // Store session_token for API calls
       setCurrentQuestionState(result.question);
       setCurrentQuestion(result.question.id);
       setQuestionNumber(result.current_question);
       setTotalQuestions(result.total_questions);
-      setHasStarted(true);
       await startCamera();
     } catch (error) {
       toast.error(error.message);
@@ -395,7 +396,7 @@ export default function InterviewRoom() {
         Math.floor(sessionInfo.time_limit * 60 - timeLeft),
       );
 
-      const result = await submitAnswer(currentQuestion.id, answer, timeTaken);
+      const result = await submitAnswer(currentQuestion.id, answer, timeTaken, sessionToken);
 
       // ✅ Authenticity Hint
       if (result.authenticityHint) {
@@ -447,6 +448,7 @@ export default function InterviewRoom() {
     navigate,
     setCurrentQuestion,
     clearChat,
+    sessionToken,
   ]);
 
   const formatTime = useCallback((seconds) => {

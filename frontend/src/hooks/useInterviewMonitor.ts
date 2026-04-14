@@ -12,6 +12,8 @@ export function useInterviewMonitor(sessionId?: string) {
     typingSpeed: 0,
   });
   const lastTypedAt = useRef<number | null>(null);
+  const startedAt = useRef<number | null>(null);
+  const totalCharacters = useRef(0);
 
   useEffect(() => {
     if (!sessionId) {
@@ -59,13 +61,35 @@ export function useInterviewMonitor(sessionId?: string) {
   const onTextInput = (value: string) => {
     const now = Date.now();
     const gap = lastTypedAt.current ? now - lastTypedAt.current : 0;
+    if (!startedAt.current) {
+      startedAt.current = now;
+    }
+    totalCharacters.current = value.length;
     lastTypedAt.current = now;
     setTypingMetrics((current) => ({
       editCount: current.editCount + 1,
       pauseCount: current.pauseCount + (gap > 5000 ? 1 : 0),
       typingBursts: current.typingBursts + (gap > 0 && gap < 1200 ? 1 : 0),
-      typingSpeed: Math.round((value.length / Math.max(1, now / 1000)) * 10) / 10,
+      typingSpeed:
+        Math.round(
+          (totalCharacters.current /
+            Math.max(1, (now - (startedAt.current || now)) / 1000)) *
+            10,
+        ) / 10,
     }));
+  };
+
+  const reset = () => {
+    setTypingMetrics({
+      editCount: 0,
+      pauseCount: 0,
+      typingBursts: 0,
+      typingSpeed: 0,
+    });
+    setViolations([]);
+    lastTypedAt.current = null;
+    startedAt.current = null;
+    totalCharacters.current = 0;
   };
 
   return useMemo(
@@ -74,6 +98,7 @@ export function useInterviewMonitor(sessionId?: string) {
       typingMetrics,
       onTextInput,
       setViolations,
+      reset,
     }),
     [typingMetrics, violations],
   );
