@@ -73,22 +73,6 @@ class AIInterviewTester:
         success, _ = self.run_test("Health Check", "GET", "", 200)
         return success
 
-    def test_admin_login(self) -> bool:
-        """Test admin login with correct credentials"""
-        success, response = self.run_test(
-            "Admin Login",
-            "POST", 
-            "auth/login",
-            200,
-            data={"email": "admin@aiproctor.com", "password": "admin123"}
-        )
-        
-        if success and 'id' in response:
-            self.log(f"Admin logged in successfully: {response.get('email')}")
-            # Store cookies for subsequent requests
-            return True
-        return False
-
     def test_invalid_login(self) -> bool:
         """Test login with invalid credentials"""
         success, _ = self.run_test(
@@ -369,7 +353,6 @@ class AIInterviewTester:
             return False
             
         # Authentication tests
-        self.test_admin_login()
         self.test_get_current_user()
         self.test_invalid_login()
         self.test_register_recruiter()

@@ -129,7 +129,6 @@ export default function InterviewResult() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <div className={`w-24 h-24 ${getScoreBg(result.final_score)} flex items-center justify-center mx-auto mb-6`}>
             <Award className={`w-12 h-12 ${getScoreColor(result.final_score)}`} />
@@ -144,7 +143,6 @@ export default function InterviewResult() {
           )}
         </div>
 
-        {/* Score Card */}
         {user?.id && (
           <div className="card-swiss p-8 text-center mb-8">
             <p className="overline mb-4">Your Score</p>
@@ -170,7 +168,6 @@ export default function InterviewResult() {
           </div>
         )}
 
-        {/* Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Summary */}
           <div className="card-swiss p-6">
@@ -212,7 +209,6 @@ export default function InterviewResult() {
           </div>
         </div>
 
-        {/* Strengths & Improvements */}
         {result.ai_evaluation && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {strengthsList.length > 0 && (
@@ -251,7 +247,6 @@ export default function InterviewResult() {
           </div>
         )}
 
-        {/* Interview Details */}
         <div className="card-swiss p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Interview Details</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -278,7 +273,6 @@ export default function InterviewResult() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center">
           <p className="text-gray-500 text-sm mb-4">
             The recruiter will review your results and contact you soon.

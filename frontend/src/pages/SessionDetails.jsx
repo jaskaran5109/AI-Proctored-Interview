@@ -130,10 +130,10 @@ export default function SessionDetails() {
         </div>
       </div>
     );
-  }
+  }  
 
-  const authenticity = session.ai_evaluation?.authenticity_assessment;
-
+  const authenticity = session?.ai_evaluation?.authenticity_assessment;
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="header-swiss">
@@ -163,14 +163,14 @@ export default function SessionDetails() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-                {session.title}
+                {session?.title}
               </h1>
-              {getStatusBadge(session.status)}
+              {getStatusBadge(session?.status)}
             </div>
-            <p className="text-gray-600">{session.job_role}</p>
+            <p className="text-gray-600">{session?.job_role}</p>
           </div>
           
-          {session.status === 'pending' && (
+          {session?.status === 'pending' && (
             <Button onClick={copyInviteLink} className="btn-secondary" data-testid="copy-invite-btn">
               <Copy className="w-4 h-4 mr-2" />
               Copy Invite Link
@@ -190,18 +190,18 @@ export default function SessionDetails() {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Candidate</p>
-                  <p className="font-medium">{session.candidate_name}</p>
-                  <p className="text-sm text-gray-600">{session.candidate_email}</p>
+                  <p className="font-medium">{session?.candidate_name}</p>
+                  <p className="text-sm text-gray-600">{session?.candidate_email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Configuration</p>
-                  <p className="font-medium">{session.question_count} questions</p>
-                  <p className="text-sm text-gray-600">{session.time_limit} min limit • {session.difficulty}</p>
+                  <p className="font-medium">{session?.question_count} questions</p>
+                  <p className="text-sm text-gray-600">{session?.time_limit} min limit • {session?.difficulty}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Topics</p>
                   <div className="flex flex-wrap gap-2">
-                    {session.topics?.map(topic => (
+                    {session?.topics?.map(topic => (
                       <Badge key={topic} variant="outline" className="badge-swiss">
                         {topic}
                       </Badge>
@@ -212,14 +212,14 @@ export default function SessionDetails() {
                   <p className="text-sm text-gray-500 mb-1">AI Assistance Used</p>
                   <p className="font-medium flex items-center gap-2">
                     <MessageCircle className="w-4 h-4 text-blue-500" />
-                    {session.ai_assistance_count || 0} messages
+                    {session?.ai_assistance_count || 0} messages
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Results (if completed) */}
-            {session.status === 'completed' && session.ai_evaluation && (
+            {session?.status === 'completed' && session?.ai_evaluation && (
               <>
                 {/* Performance Chart */}
                 {chartData.length > 0 && (

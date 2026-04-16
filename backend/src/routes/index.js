@@ -68,6 +68,7 @@ apiRouter.get("/interview/:interviewId/candidates/:sessionId", requireAuth, sess
 apiRouter.post("/admin/roles", requireAuth, requireRole("admin"), sessionController.createRoleTemplate);
 apiRouter.get("/admin/analytics", requireAuth, requireRole("admin"), sessionController.adminAnalytics);
 apiRouter.get("/roles/templates", requireAuth, sessionController.listRoleTemplates);
+apiRouter.get("/admin/users", requireAuth, requireRole("admin"), sessionController.listUsers);
 
 apiRouter.post("/ai/generate-question", aiLimiter, aiController.generateQuestion);
 apiRouter.post("/ai/analyze-answer", aiLimiter, aiController.analyzeAnswer);

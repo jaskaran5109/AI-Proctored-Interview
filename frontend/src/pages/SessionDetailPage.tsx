@@ -204,7 +204,7 @@ export function SessionDetailPage() {
                 <th className="pb-3 pr-4 font-medium">Started</th>
                 <th className="pb-3 pr-4 font-medium">Completed</th>
                 <th className="pb-3 pr-4 font-medium">Duration</th>
-                <th className="pb-3 font-medium">Actions</th>
+                <th className="pb-3 pr-4 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -227,7 +227,7 @@ export function SessionDetailPage() {
                     </span>
                   </td>
                   <td className="py-4 pr-4 text-slate-700 dark:text-slate-300">
-                    {candidate.score ?? "--"}%
+                    {candidate?.score ?? "--"}%
                   </td>
                   <td className="py-4 pr-4">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(candidate.recommendation)}`}>
@@ -249,7 +249,7 @@ export function SessionDetailPage() {
                   <td className="py-4">
                     <button
                       type="button"
-                      className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-cyan-500 dark:hover:bg-cyan-400"
+                      className="rounded-2xl bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 dark:bg-cyan-500 dark:hover:bg-cyan-400"
                       onClick={() => {
                         setSelectedCandidateId(candidate.id);
                         setModalOpen(true);

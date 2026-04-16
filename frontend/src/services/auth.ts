@@ -23,3 +23,8 @@ export async function me() {
   const { data } = await api.get<User>("/auth/me");
   return data;
 }
+
+export async function fetchUsers() {
+  const { data } = await api.get<{ users: User[]; total: number }>("/admin/users");
+  return data;
+}

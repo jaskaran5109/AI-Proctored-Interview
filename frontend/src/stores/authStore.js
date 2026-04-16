@@ -59,6 +59,16 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  fetchUsers: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await axios.get(`${API_URL}/api/admin/users`);
+      set({ users: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+    }
+  },
+  
   clearError: () => set({ error: null }),
 }));
 

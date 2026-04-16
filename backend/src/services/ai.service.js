@@ -1,4 +1,4 @@
-const { aiClient, aiModel } = require("../ai/ollama.client");
+const { aiClient, aiModel, groq } = require("../ai/ollama.client");
 const { logger } = require("../utils/logger");
 
 // Configurable settings for Ollama
@@ -168,7 +168,7 @@ async function jsonCompletion(prompt, fallback, temperature = 0.3) {
   try {
     const response = await withRetry(
       async (signal) =>
-        await aiClient.chat({
+        await groq.chat.completions.create({
           model: aiModel,
           messages: [
             {
@@ -177,20 +177,18 @@ async function jsonCompletion(prompt, fallback, temperature = 0.3) {
             },
             { role: "user", content: prompt },
           ],
-          options: {
-            temperature, // ✅ correct place for Ollama
-          },
-          signal,
           stream: false,
+          temperature: 1,
+          response_format: { type: "json_object" },
         }),
       fallback,
-    );
-
+    );  
+    
     if (!response || typeof response !== "object") {
       logger.warn("AI returned invalid response, using fallback");
       return fallback;
     }
-    const raw = response?.message?.content;
+    const raw = response.choices[0]?.message?.content;
 
     const jsonString = extractJSON(raw); // ✅ extract first
 

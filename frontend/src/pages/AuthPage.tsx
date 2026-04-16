@@ -33,8 +33,8 @@ export function AuthPage() {
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@aiproctor.com",
-      password: "admin123",
+      email: "",
+      password: "",
     },
   });
 

@@ -21,16 +21,17 @@ function makeCodingQuestion(topic = "algorithms", difficulty = "medium") {
     title: `Coding Question ${codingQuestionCounter}`,
     description: "Read integers from stdin and print their sum.",
     difficulty,
-    constraints: ["Support whitespace-delimited integers.", "Print a single number."],
+    constraints: [
+      "Support whitespace-delimited integers.",
+      "Print a single number.",
+    ],
     starterCode: {
       javascript:
         "let input='';process.stdin.on('data',c=>input+=c);process.stdin.on('end',()=>{const nums=input.trim().split(/\\s+/).filter(Boolean).map(Number);console.log(nums.reduce((a,b)=>a+b,0));});",
       python:
         "import sys\nnums=list(map(int,sys.stdin.read().strip().split()))\nprint(sum(nums))",
-      java:
-        "import java.util.*; class Main { public static void main(String[] args){ Scanner sc=new Scanner(System.in); long sum=0; while(sc.hasNextLong()) sum+=sc.nextLong(); System.out.print(sum); }}",
-      cpp:
-        "#include <bits/stdc++.h>\nusing namespace std; int main(){ long long x,sum=0; while(cin>>x) sum+=x; cout<<sum; }",
+      java: "import java.util.*; class Main { public static void main(String[] args){ Scanner sc=new Scanner(System.in); long sum=0; while(sc.hasNextLong()) sum+=sc.nextLong(); System.out.print(sum); }}",
+      cpp: "#include <bits/stdc++.h>\nusing namespace std; int main(){ long long x,sum=0; while(cin>>x) sum+=x; cout<<sum; }",
     },
     supportedLanguages: ["javascript", "python", "java", "cpp"],
     testCases: [
@@ -59,7 +60,8 @@ function mockAi() {
   }) =>
     Array.from({ length: count }, (_, index) => {
       textQuestionCounter += 1;
-      const topic = topics[index % Math.max(1, topics.length)] || "fundamentals";
+      const topic =
+        topics[index % Math.max(1, topics.length)] || "fundamentals";
       return {
         sequence: index + 1,
         skill: topic,
@@ -154,7 +156,10 @@ process.stdin.on("end", () => {
     return { wrappedCode: "", strategy: "unsupported" };
   };
 
-  aiService.finalEvaluation = async ({ answers = [], codeSubmissions = [] }) => ({
+  aiService.finalEvaluation = async ({
+    answers = [],
+    codeSubmissions = [],
+  }) => ({
     finalScore: Number(
       (
         [...answers, ...codeSubmissions].reduce(
@@ -253,8 +258,12 @@ test("mixed interview flow creates fresh session questions and completes end-to-
   const textQuestionId = joinResponse.body.question.id;
   const sessionToken = joinResponse.body.session_token;
 
-  const afterJoinQuestions = await Question.find({ sessionId: { $ne: null } }).lean();
-  const afterJoinCoding = await CodingQuestion.find({ sessionId: { $ne: null } }).lean();
+  const afterJoinQuestions = await Question.find({
+    sessionId: { $ne: null },
+  }).lean();
+  const afterJoinCoding = await CodingQuestion.find({
+    sessionId: { $ne: null },
+  }).lean();
   assert.equal(afterJoinQuestions.length, 0);
   assert.equal(afterJoinCoding.length, 0);
 
@@ -400,7 +409,10 @@ test("timeout finalizes the session and preserves the current typed answer", asy
     .expect(200);
 
   assert.equal(resultResponse.body.status, "timed_out");
-  assert.equal(resultResponse.body.questions[0].answer_text, "This answer should be captured during timeout.");
+  assert.equal(
+    resultResponse.body.questions[0].answer_text,
+    "This answer should be captured during timeout.",
+  );
 });
 
 test("custom input runner wraps function-style submissions for generic coding questions", async () => {

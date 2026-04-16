@@ -6,11 +6,15 @@ export interface AuthTokens {
 }
 
 export interface User {
+  _id: string;
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  createdAt: string;
+  updatedAt: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface AuthResponse {

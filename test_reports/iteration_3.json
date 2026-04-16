@@ -14,7 +14,7 @@
   
   "passed_tests": [
     "Backend health check",
-    "Admin login with correct credentials (admin@aiproctor.com / admin123)",
+    "Admin login with correct credentials",
     "Dashboard stats API with new authenticity metrics (average_authenticity, understanding_breakdown)",
     "Interview session creation",
     "Session listing with authenticity fields",

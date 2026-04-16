@@ -11,6 +11,7 @@ const {
   Question,
   Result,
   RoleTemplate,
+  User,
 } = require("../models");
 const aiService = require("../services/ai.service");
 const { emitToSession } = require("../utils/socket");
@@ -446,11 +447,6 @@ async function generateStarterCode(req, res, next) {
       { new: true },
     );
 
-    console.log("✅ Generated starter code", {
-      questionId: codingQuestion._id.toString(),
-      language: payload.language,
-    });
-
     res.json({ starterCode });
   } catch (error) {
     console.error("❌ Failed to generate starter code", {
@@ -860,6 +856,7 @@ module.exports = {
   submitAnswer,
   terminateSession,
   validateInterview,
+  listUsers
 };
 
 async function listSessions(req, res, next) {
@@ -870,6 +867,18 @@ async function listSessions(req, res, next) {
     res.json({
       sessions: interviews.map(mapSession),
       total: interviews.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function listUsers(req, res, next) {
+  try {
+    const users = await User.find().sort({ createdAt: -1 }).lean();
+    res.json({
+      users,
+      total: users.length,
     });
   } catch (error) {
     next(error);

@@ -147,9 +147,6 @@ export function ResultPage() {
               >
                 {finalEvaluation.recommendation || feedback.recommendation || "Pending"}
               </p>
-              <p className="mt-2 text-xs text-slate-400">
-                Performance trend: {feedback.performance_trend || finalEvaluation.performanceTrend || "steady"}
-              </p>
             </div>
           </div>
         </section>
