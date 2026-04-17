@@ -155,12 +155,12 @@ export function AuthPage() {
             <div>
               {mode === "login" ? (
                 <>
-                  <input className="input-premium" placeholder="Email" {...loginForm.register("email")} />
+                  <input type="email" className="input-premium" placeholder="Email" {...loginForm.register("email")} />
                   <p className="mt-1 text-sm text-rose-500">{loginForm.formState.errors.email?.message}</p>
                 </>
               ) : (
                 <>
-                  <input className="input-premium" placeholder="Email" {...signupForm.register("email")} />
+                  <input type="email" className="input-premium" placeholder="Email" {...signupForm.register("email")} />
                   <p className="mt-1 text-sm text-rose-500">{signupForm.formState.errors.email?.message}</p>
                 </>
               )}
