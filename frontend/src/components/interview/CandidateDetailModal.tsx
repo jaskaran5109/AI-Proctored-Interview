@@ -27,7 +27,18 @@ const TypedDialogContent = DialogContent as any;
 const TypedDialogHeader = DialogHeader as any;
 const TypedDialogTitle = DialogTitle as any;
 const TypedDialogDescription = DialogDescription as any;
+type SkillScoreValue =
+  | number
+  | {
+      score?: number;
+      difficulty?: string;
+    };
 
+type SkillChartItem = {
+  name: string;
+  score: number;
+  difficulty: string;
+};
 function formatDate(value?: string | null) {
   if (!value) {
     return "--";
@@ -87,17 +98,24 @@ export function CandidateDetailModal({
 
   const detail = detailQuery.data;
 
-  const skillChartData = useMemo(
-    () =>
-      Object.entries(detail?.session?.skill_scores || {}).map(
-        ([name, value]: [string, any]) => ({
-          name,
-          score: value?.score ?? 0,
-          difficulty: value?.difficulty ?? "easy",
-        }),
-      ),
-    [detail?.session?.skill_scores],
-  );
+  const skillChartData = useMemo<SkillChartItem[]>(() => {
+    const skillScores = (detail?.session?.skill_scores ?? {}) as Record<
+      string,
+      SkillScoreValue
+    >;
+
+    return Object.entries(skillScores).map(
+      ([name, value]): SkillChartItem => ({
+        name,
+        score: typeof value === "number" ? value : (value?.score ?? 0),
+
+        difficulty:
+          typeof value === "object" && value !== null
+            ? (value?.difficulty ?? "easy")
+            : "easy",
+      }),
+    );
+  }, [detail?.session?.skill_scores]);
 
   const gaugeData = useMemo(
     () => [
@@ -162,9 +180,9 @@ export function CandidateDetailModal({
                         Status
                       </p>
                       <p
-                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(detail.session.status)}`}
+                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(detail?.session?.status)}`}
                       >
-                        {detail.session.status}
+                        {detail?.session?.status}
                       </p>
                     </div>
                     <div className="rounded-3xl bg-white p-4 dark:bg-slate-900/70">
@@ -172,9 +190,9 @@ export function CandidateDetailModal({
                         Recommendation
                       </p>
                       <p
-                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(detail.session.recommendation)}`}
+                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(detail?.session?.recommendation)}`}
                       >
-                        {detail.session.recommendation || "--"}
+                        {detail?.session?.recommendation || "--"}
                       </p>
                     </div>
                     <div className="rounded-3xl bg-white p-4 dark:bg-slate-900/70">
@@ -182,7 +200,7 @@ export function CandidateDetailModal({
                         Started
                       </p>
                       <p className="mt-2 text-sm font-medium">
-                        {formatDate(detail.session.started_at)}
+                        {formatDate(detail?.session?.started_at)}
                       </p>
                     </div>
                     <div className="rounded-3xl bg-white p-4 dark:bg-slate-900/70">
@@ -190,7 +208,7 @@ export function CandidateDetailModal({
                         Duration
                       </p>
                       <p className="mt-2 text-sm font-medium">
-                        {formatDuration(detail.session.duration_seconds)}
+                        {formatDuration(detail?.session?.duration_seconds)}
                       </p>
                     </div>
                   </div>
@@ -199,9 +217,45 @@ export function CandidateDetailModal({
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       AI Summary
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-                      {detail.session.ai_summary || "No AI summary available."}
-                    </p>
+                    <div className="mt-4 space-y-3 text-sm">
+                      <h4 className="font-semibold">
+                        Evaluation Score :{" "}
+                        {typeof detail?.session?.ai_summary === "string" ? (
+                          <p>{detail.session.ai_summary}</p>
+                        ) : (
+                          <>
+                            <h4>
+                              Evaluation Score:{" "}
+                              {detail?.session?.ai_summary?.evaluation?.score}
+                            </h4>
+                          </>
+                        )}
+                      </h4>
+
+                      <div>
+                        <h4 className="font-semibold">Weaknesses</h4>
+
+                        <ul className="list-disc pl-5">
+                          {detail?.session?.ai_summary?.evaluation?.weaknesses?.map(
+                            (w, i) => (
+                              <li key={i}>{w}</li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold">Improvements</h4>
+
+                        <ul className="list-disc pl-5">
+                          {detail?.session?.ai_summary?.evaluation?.improvements?.map(
+                            (imp, i) => (
+                              <li key={i}>{imp}</li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -210,8 +264,8 @@ export function CandidateDetailModal({
                         Strengths
                       </p>
                       <div className="mt-3 space-y-2">
-                        {(detail.session.strengths || []).length ? (
-                          detail.session.strengths?.map((item) => (
+                        {(detail?.session?.strengths || []).length ? (
+                          detail?.session?.strengths?.map((item) => (
                             <div
                               key={item}
                               className="rounded-2xl bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-100"
@@ -231,8 +285,8 @@ export function CandidateDetailModal({
                         Improvements
                       </p>
                       <div className="mt-3 space-y-2">
-                        {(detail.session.improvements || []).length ? (
-                          detail.session.improvements?.map((item) => (
+                        {(detail?.session?.improvements || []).length ? (
+                          detail?.session?.improvements?.map((item) => (
                             <div
                               key={item}
                               className="rounded-2xl bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-100"
@@ -276,7 +330,7 @@ export function CandidateDetailModal({
                     </div>
                     <div className="-mt-12 text-center">
                       <p className="text-4xl font-semibold text-slate-950 dark:text-white">
-                        {detail.session.overall_score ?? "--"}
+                        {detail?.session?.overall_score ?? "--"}
                       </p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
                         out of 10
@@ -314,7 +368,7 @@ export function CandidateDetailModal({
                         Authenticity
                       </p>
                       <p className="mt-2 text-2xl font-semibold">
-                        {detail.session.authenticity_score ?? "--"}
+                        {detail?.session?.authenticity_score ?? "--"}
                       </p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900/70">
@@ -322,7 +376,7 @@ export function CandidateDetailModal({
                         Confidence
                       </p>
                       <p className="mt-2 text-2xl font-semibold">
-                        {detail.session.confidence_score ?? "--"}
+                        {detail?.session?.confidence_score ?? "--"}
                       </p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900/70">
@@ -331,7 +385,7 @@ export function CandidateDetailModal({
                       </p>
                       <p className="mt-2 text-2xl font-semibold">
                         {Number(
-                          detail.session.authenticity_breakdown
+                          detail?.session?.authenticity_breakdown
                             ?.ai_usage_count || 0,
                         )}
                       </p>
@@ -346,42 +400,42 @@ export function CandidateDetailModal({
                 {detail?.questions &&
                   detail?.questions?.map((question) => (
                     <div
-                      key={`${question.question_type || question.id}-${question.sequence}`}
+                      key={`${question?.question_type || question?.id}-${question?.sequence}`}
                       className="rounded-[28px] border border-slate-200 bg-slate-50/70 p-6 dark:border-white/10 dark:bg-white/[0.03]"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">
-                              #{question.sequence}
+                              #{question?.sequence}
                             </span>
                             <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(question.question_type)}`}
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${badgeClass(question?.question_type)}`}
                             >
-                              {question.question_type === "coding"
+                              {question?.question_type === "coding"
                                 ? "Coding"
                                 : "Text"}
                             </span>
                           </div>
                           <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">
-                            {question.title || question.question_text}
+                            {question?.title || question?.question_text}
                           </h3>
-                          {question.description && (
+                          {question?.description && (
                             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                              {question.description}
+                              {question?.description}
                             </p>
                           )}
                         </div>
                         <div className="text-right text-sm text-slate-500 dark:text-slate-400">
                           <p>
-                            Score: {String(question.evaluation?.score ?? "--")}
+                            Score: {String(question?.evaluation?.score ?? "--")}
                           </p>
                           <p>
-                            Time: {formatDuration(question.time_taken_seconds)}
+                            Time: {formatDuration(question?.time_taken_seconds)}
                           </p>
                           <p>
                             AI assist:{" "}
-                            {question.ai_assistance_used ? "Yes" : "No"}
+                            {question?.ai_assistance_used ? "Yes" : "No"}
                           </p>
                         </div>
                       </div>
@@ -389,16 +443,16 @@ export function CandidateDetailModal({
                       <div className="mt-5 grid gap-4 lg:grid-cols-2">
                         <div className="rounded-3xl bg-white p-4 dark:bg-slate-900/70">
                           <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                            {question.question_type === "coding"
+                            {question?.question_type === "coding"
                               ? "Final code"
                               : "Candidate answer"}
                           </p>
                           <pre className="mt-3 overflow-x-auto rounded-2xl bg-slate-950 p-4 text-xs text-cyan-100">
-                            {question.answer_text || "No submission captured."}
+                            {question?.answer_text || "No submission captured."}
                           </pre>
-                          {question.language && (
+                          {question?.language && (
                             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                              Language used: {question.language}
+                              Language used: {question?.language}
                             </p>
                           )}
                         </div>
@@ -410,7 +464,7 @@ export function CandidateDetailModal({
                           <div className="mt-3 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                             <p>
                               {String(
-                                question.evaluation?.feedback ||
+                                question?.evaluation?.feedback ||
                                   "No evaluation feedback captured.",
                               )}
                             </p>
@@ -478,16 +532,16 @@ export function CandidateDetailModal({
                         </div>
                       </div>
 
-                      {question.question_type === "coding" && (
+                      {question?.question_type === "coding" && (
                         <div className="mt-4 rounded-3xl bg-white p-4 dark:bg-slate-900/70">
                           <p className="text-sm font-semibold text-slate-900 dark:text-white">
                             Visible test case results
                           </p>
                           <div className="mt-3 space-y-2">
-                            {(question.test_results || []).length ? (
-                              question.test_results?.map((item, index) => (
+                            {(question?.test_results || []).length ? (
+                              question?.test_results?.map((item, index) => (
                                 <div
-                                  key={`${question.id}-test-${index}`}
+                                  key={`${question?.id}-test-${index}`}
                                   className={`rounded-2xl px-3 py-3 text-sm ${
                                     item.passed
                                       ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-100"

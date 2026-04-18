@@ -261,7 +261,13 @@ export interface CandidateDetailResponse {
     recommendation?: string;
     authenticity_score?: number | null;
     confidence_score?: number | null;
-    ai_summary?: string;
+    ai_summary?: {
+      evaluation?: {
+        score: number;
+        weaknesses: string[];
+        improvements: string[];
+      };
+    };
     strengths?: string[];
     improvements?: string[];
     skill_scores?: Record<string, number>;
